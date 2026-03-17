@@ -1,0 +1,27 @@
+# Trove configuration
+# Copy to .trove.yml and customize for your setup.
+
+# Storage backend: "json" (zero deps) or "sqlite" (recommended, faster)
+storage: json
+
+# Where Trove stores its index
+data_dir: ~/.trove
+
+# Embedding provider: "anthropic" (requires ANTHROPIC_API_KEY) or "local" (keyword-based, no API needed)
+embeddings: local
+
+sources:
+  - connector: local
+    config:
+      paths:
+        - ~/projects
+        - ~/Documents/screenshots
+      extensions: [".md", ".ts", ".js", ".py", ".rs", ".png", ".jpg", ".mp4", ".pdf", ".bpmn"]
+      ignore: ["node_modules", ".git", "dist", "target", "__pycache__"]
+      max_depth: 5
+
+  - connector: github
+    config:
+      username: your-github-username
+      include_forks: false
+      include_archived: false

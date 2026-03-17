@@ -1,0 +1,46 @@
+{
+  "name": "trove",
+  "version": "0.1.0",
+  "description": "Your content. All of it. A personal content OS for creators — semantic search across GitHub, files, screenshots, videos.",
+  "type": "module",
+  "bin": {
+    "trove": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "keywords": [
+    "content-os",
+    "semantic-search",
+    "mcp",
+    "claude",
+    "ai",
+    "personal-knowledge",
+    "developer-tools",
+    "cli",
+    "creator-tools"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@trove/core": "workspace:*",
+    "@trove/mcp": "workspace:*",
+    "@trove/shared": "workspace:*",
+    "@trove/connector-local": "workspace:*",
+    "@trove/connector-github": "workspace:*",
+    "commander": "^13.0.0",
+    "chalk": "^5.4.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
