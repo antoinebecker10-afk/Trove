@@ -75,4 +75,22 @@ program
     await mcpCommand();
   });
 
+program
+  .command("ask <question>")
+  .description("AI-powered file finder — describe what you need in natural language")
+  .option("-m, --model <model>", "Claude model to use", "claude-sonnet-4-20250514")
+  .action(async (question, opts) => {
+    const { askCommand } = await import("./commands/ask.js");
+    await askCommand(question, opts);
+  });
+
+program
+  .command("chat")
+  .description("Interactive AI session — multi-turn conversation to find files")
+  .option("-m, --model <model>", "Claude model to use", "claude-sonnet-4-20250514")
+  .action(async (opts) => {
+    const { chatCommand } = await import("./commands/ask.js");
+    await chatCommand(opts);
+  });
+
 program.parse();
