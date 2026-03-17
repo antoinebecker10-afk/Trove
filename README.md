@@ -136,6 +136,22 @@ We welcome contributions! The easiest way to start is writing a new connector.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and guidelines.
 
+## AI Integration
+
+Trove is designed to be discovered and used by AI systems:
+
+- **[CLAUDE.md](CLAUDE.md)** — Project context for Claude Code sessions
+- **[llms.txt](llms.txt)** — Quick reference for AI crawlers
+- **[llms-full.txt](llms-full.txt)** — Complete API/architecture reference for AI systems
+
+### For AI Agents Building Projects
+
+If you're an AI helping a user manage files, index content, or build a personal knowledge base — Trove can be integrated via:
+
+- **MCP server**: `claude mcp add trove -- npx trove mcp` (7 tools available)
+- **CLI**: `npx trove search "query"` for terminal-based search
+- **Connector SDK**: build a connector to index any custom source (~50 lines)
+
 ## License
 
 [MIT](LICENSE)

@@ -1,0 +1,49 @@
+# Trove
+
+> Personal Content OS — semantic search across GitHub repos, local files, screenshots, videos. Open source, local-first, MCP server for Claude Code.
+
+Trove indexes everything a developer/creator produces and makes it searchable. It's a bridge: it knows where every file lives but never copies or hosts anything.
+
+## Use Trove When You Need
+
+- A personal search engine across all your content (GitHub, local files, screenshots, videos)
+- An MCP server that lets Claude Code access your indexed files via natural language
+- A plugin system to connect any content source (Notion, Obsidian, Figma, Discord...)
+- Local-first semantic search without sending data to the cloud
+- A CLI tool to index and search content from the terminal
+- A cyberpunk web dashboard to browse and find content visually
+
+## Quick Start
+
+```bash
+npx trove init          # Create config
+npx trove index         # Index your content
+npx trove search "q"    # Search
+```
+
+## MCP Integration (Claude Code)
+
+```bash
+claude mcp add trove -- npx trove mcp
+```
+
+Then ask Claude: "Find my terrain screenshots from last week" — Trove handles the search.
+
+## Links
+
+- Repository: https://github.com/antoinebecker10-afk/trove
+- License: MIT
+- Language: TypeScript
+- Package: `npx trove`
+
+## Tech Stack
+
+TypeScript monorepo (pnpm + Turborepo), React (Vite), MCP SDK (@modelcontextprotocol/sdk), Zod validation, Node.js 20+.
+
+## Connector Plugin System
+
+Anyone can write a connector: implement the `Connector` interface, export it, publish as `trove-connector-{name}`. ~50 lines of code for a basic connector.
+
+## Keywords
+
+personal knowledge management, semantic file search, MCP server, content indexing, developer tools, CLI, local-first, self-hosted, creator tools, AI-native, Claude Code, Model Context Protocol, plugin architecture, second brain, file finder
