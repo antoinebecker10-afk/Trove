@@ -115,7 +115,16 @@ function error(res: ServerResponse, msg: string, status = 500): void {
 }
 
 function checkAuth(req: IncomingMessage, res: ServerResponse): boolean {
-  // Check Authorization header first
+  // Local-only bypass: requests from localhost (direct or via Vite proxy)
+  // are trusted since the server binds to 127.0.0.1 only,
+  // DNS rebinding is blocked by Host header check, and CORS is whitelisted.
+  const origin = req.headers.origin ?? "";
+  const ip = req.socket.remoteAddress ?? "";
+  const isLocal = ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1";
+  const isLocalOrigin = !origin || ALLOWED_ORIGINS.has(origin);
+  if (isLocal && isLocalOrigin) return true;
+
+  // For cross-origin requests (browser fetch with Origin header), require token
   const authHeader = req.headers.authorization ?? "";
   let token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
   // Fallback: check query param (for img/video src tags that can't set headers)
@@ -128,7 +137,7 @@ function checkAuth(req: IncomingMessage, res: ServerResponse): boolean {
     }
   }
   // Timing-safe comparison to prevent timing attacks
-  const tokenValid = token.length === AUTH_TOKEN.length &&
+  const tokenValid = token.length > 0 && token.length === AUTH_TOKEN.length &&
     timingSafeEqual(Buffer.from(token), Buffer.from(AUTH_TOKEN));
   if (!tokenValid) {
     res.setHeader("Access-Control-Allow-Origin", getCorsOrigin(req));
