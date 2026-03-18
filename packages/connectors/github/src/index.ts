@@ -48,7 +48,9 @@ async function fetchAllPages<T>(
           "GitHub API rate limit exceeded. Set GITHUB_TOKEN env var to increase limits.",
         );
       }
-      throw new Error(`GitHub API error (${response.status}): ${await response.text()}`);
+      // Don't leak response body — may contain sensitive info
+      await response.text().catch(() => {});
+      throw new Error(`GitHub API error (${response.status})`);
     }
 
     const data = (await response.json()) as T[];

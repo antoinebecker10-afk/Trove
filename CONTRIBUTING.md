@@ -21,7 +21,7 @@ packages/
     local/        # Local filesystem connector (@trove/connector-local)
     github/       # GitHub repos connector (@trove/connector-github)
   mcp/            # MCP server for Claude Code (@trove/mcp)
-  cli/            # CLI tool — `npx trove` (@trove/cli → published as `trove`)
+  cli/            # CLI tool — `npx trove-os` (@trove/cli → published as `trove-os`)
   web/            # React web dashboard (@trove/web)
 ```
 

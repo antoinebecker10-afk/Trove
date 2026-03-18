@@ -10,6 +10,7 @@ import { loadConfig, resolveDataDir } from "./config.js";
 import { createStore, type Store } from "./store.js";
 import { createEmbeddingProvider, type EmbeddingProvider } from "./embeddings.js";
 import { loadConnector } from "./plugin-loader.js";
+import { redactSecrets } from "./redact.js";
 
 export interface EngineOptions {
   /** Override config file search directory */
@@ -186,6 +187,14 @@ export class TroveEngine {
   }
 
   /**
+   * Get all indexed items (no embeddings/content stripped — caller should handle).
+   */
+  async getAllItems(): Promise<ContentItem[]> {
+    this.assertInitialized();
+    return this.store.getAllItems();
+  }
+
+  /**
    * Get the current config (sanitized — no secrets).
    */
   getConfig(): TroveConfig {
@@ -193,9 +202,34 @@ export class TroveEngine {
   }
 
   private async embedAndStore(items: ContentItem[]): Promise<void> {
+    // Redact secrets from content before storing — API keys, passwords,
+    // private keys, credit card numbers, etc. are replaced with [REDACTED:type]
+    let totalRedacted = 0;
+    for (const item of items) {
+      if (item.content) {
+        const { redacted, count } = redactSecrets(item.content);
+        if (count > 0) {
+          item.content = redacted;
+          totalRedacted += count;
+        }
+      }
+      if (item.description) {
+        const { redacted, count } = redactSecrets(item.description);
+        if (count > 0) {
+          item.description = redacted;
+          totalRedacted += count;
+        }
+      }
+    }
+    if (totalRedacted > 0) {
+      console.error(`[trove] Redacted ${totalRedacted} secret(s) from indexed content`);
+    }
+
+    // Only embed metadata (title, description, tags) — NEVER send file content
+    // to external APIs. Content may contain credentials, keys, or sensitive data.
     const textsToEmbed = items.map(
       (item) =>
-        `${item.title} ${item.description} ${item.tags.join(" ")} ${(item.content ?? "").slice(0, 2000)}`,
+        `${item.title} ${item.description} ${item.tags.join(" ")}`,
     );
 
     try {

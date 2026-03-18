@@ -90,8 +90,9 @@ export class AnthropicEmbeddingProvider implements EmbeddingProvider {
     });
 
     if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`Anthropic embeddings API error (${response.status}): ${body}`);
+      // Don't leak response body — may contain sensitive info
+      await response.text().catch(() => {});
+      throw new Error(`Anthropic embeddings API error (${response.status})`);
     }
 
     const data = (await response.json()) as {

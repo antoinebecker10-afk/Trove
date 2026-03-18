@@ -13,6 +13,98 @@ You will receive search results from the user's index. Your job:
 
 Always start your answer with the file path or URI. If nothing matches, say so clearly and suggest different search terms.`;
 
+// ---------------------------------------------------------------------------
+// LLM provider abstraction — Ollama (local) or Anthropic (cloud)
+// ---------------------------------------------------------------------------
+
+interface LLMOptions {
+  model: string;
+  system: string;
+  messages: Array<{ role: string; content: string }>;
+  maxTokens?: number;
+}
+
+async function callLLM(opts: LLMOptions): Promise<string> {
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+  if (anthropicKey) {
+    return callAnthropic(anthropicKey, opts);
+  }
+
+  // Default: Ollama local
+  return callOllama(opts);
+}
+
+async function callAnthropic(
+  apiKey: string,
+  opts: LLMOptions,
+): Promise<string> {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2024-10-22",
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      max_tokens: opts.maxTokens ?? 500,
+      system: opts.system,
+      messages: opts.messages,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Claude API error (${response.status}): ${body}`);
+  }
+
+  const data = (await response.json()) as {
+    content: Array<{ type: string; text?: string }>;
+  };
+  return data.content.find((b) => b.type === "text")?.text ?? "";
+}
+
+async function callOllama(opts: LLMOptions): Promise<string> {
+  const ollamaUrl =
+    process.env.OLLAMA_URL ?? "http://localhost:11434";
+  const ollamaModel = process.env.OLLAMA_MODEL ?? "llama3.2";
+
+  const messages = [
+    { role: "system", content: opts.system },
+    ...opts.messages,
+  ];
+
+  let response: Response;
+  try {
+    response = await fetch(`${ollamaUrl}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: ollamaModel,
+        messages,
+        max_tokens: opts.maxTokens ?? 500,
+      }),
+    });
+  } catch {
+    throw new Error(
+      `Cannot reach Ollama at ${ollamaUrl}. Is it running?\n` +
+        "  Install: https://ollama.com\n" +
+        `  Then: ollama pull ${ollamaModel}`,
+    );
+  }
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Ollama error (${response.status}): ${body}`);
+  }
+
+  const data = (await response.json()) as {
+    choices: Array<{ message: { content: string } }>;
+  };
+  return data.choices?.[0]?.message?.content ?? "";
+}
+
 /**
  * `trove ask <question>` — AI-powered file finder.
  * Searches the index, sends results to Claude, gets a smart answer.

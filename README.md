@@ -5,134 +5,384 @@
 <h1 align="center">🦞 Trove</h1>
 
 <p align="center">
-  <strong>Your content. All of it.</strong><br/>
-  Semantic search across GitHub repos, local files, screenshots, videos — one index, one search bar.
+  <strong>Your content. All of it. One search.</strong><br/>
+  A personal content OS that indexes everything you create — repos, files, docs, screenshots, bookmarks, messages — and makes it all searchable from one place.
 </p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen" alt="Node.js" /></a>
+  <a href="https://github.com/antoinebecker10-afk/trove"><img src="https://img.shields.io/github/stars/antoinebecker10-afk/trove?style=social" alt="GitHub stars" /></a>
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick Start</a> · <a href="#connectors">14 Connectors</a> · <a href="#dashboard">Dashboard</a> · <a href="#mcp-server">MCP for Claude Code</a> · <a href="#write-a-connector">Write a Connector</a>
 </p>
 
 ---
 
-## Why Trove?
+## The Problem
 
-Every creator has their work scattered across GitHub, local folders, screenshots, Figma, videos, docs. Finding that one terrain screenshot from last week? That API design doc? That demo video?
+Your work is everywhere. GitHub repos. Local folders. Notion docs. Figma designs. Slack threads. Screenshots you took 3 days ago. That API doc you bookmarked somewhere.
 
-**Trove indexes everything you create and makes it searchable — locally, privately, instantly.**
+You spend more time **looking for things** than actually working on them.
 
-- **Semantic search** — find content by meaning, not just keywords
-- **Plugin connectors** — GitHub, local filesystem, and more coming (Notion, Figma, Discord)
-- **MCP server** — ask Claude Code "find my terrain screenshots" directly from your IDE
-- **Zero cloud** — everything runs locally, your data stays yours
-- **Cyberpunk terminal UI** — because developers deserve beautiful tools
+## The Solution
+
+Trove indexes everything in one place and lets you search across all of it — semantically, locally, privately.
+
+```bash
+npx trove-os init     # setup
+npx trove-os index    # index everything
+npx trove-os search "that API design doc from last week"
+```
+
+No cloud. No subscriptions. Your data stays on your machine.
+
+---
+
+## Features
+
+**Search everything from one place**
+- Semantic search — find by meaning, not just keywords
+- Keyword fallback — always finds something
+- AI-powered answers via local Ollama
+
+**14 connectors, plug and play**
+- Connect Notion, GitHub, Slack, Figma, and 10 more with a setup wizard in the dashboard
+- Each connector is ~100-200 lines of TypeScript. Easy to build, easy to contribute.
+
+**Web dashboard**
+- Dual-pane file manager with drag & drop
+- Masonry launcher with thumbnails
+- Semantic search with AI answers
+- Sources panel to connect/disconnect services in 1 click
+- System monitor (RAM, disk, CPU)
+- Keyboard shortcuts, context menus, preview modals
+
+**MCP server for Claude Code**
+- 7 tools: find, open, locate, search, list-sources, get-content, reindex
+- Ask Claude "find my terrain screenshots" directly from your IDE
+
+**Local-first, zero cloud**
+- Everything runs on your machine
+- JSON index at `~/.trove/`
+- Local TF-IDF embeddings (zero API calls) or Anthropic embeddings (optional)
+
+**Security-first architecture**
+- Sensitive files auto-blocked from indexing (`.env`, private keys, wallets, credentials — 40+ patterns)
+- Secrets redacted in indexed content (API keys, passwords, credit cards → `[REDACTED]`)
+- Optional AES-256-GCM encryption at rest for the index
+- Auth token required on every API request
+- CORS restricted to localhost, DNS rebinding protection
+- No file content sent to external APIs for embeddings
+- MCP tools refuse to read sensitive files
+- Timing-safe token comparison, security headers, request size limits
+
+---
 
 ## Quick Start
 
 ```bash
-npx trove init        # scaffold config
-npx trove index       # index your content
-npx trove search "terrain heightmap"
+# Install and initialize
+npx trove-os init
+
+# Edit .trove.yml to configure your sources
+# Edit .env to add API tokens
+
+# Index your content
+npx trove-os index
+
+# Search
+npx trove-os search "react component for auth"
+
+# Launch the dashboard
+cd trove && npx tsx packages/web/server.ts &
+cd packages/web && npx vite
+# Open http://localhost:7332
 ```
 
 ## Use with Claude Code (MCP)
 
 ```bash
-claude mcp add trove -- npx trove mcp
+claude mcp add trove -- npx trove-os mcp
 ```
 
 Then ask Claude:
+
 > "Find my Bevy terrain screenshots from last week"
 
 > "What repos do I have about multiplayer?"
 
-> "Show me my BPMN diagrams"
+> "Where's that BPMN diagram?"
 
-## CLI Commands
+---
 
-```bash
-trove init             # Initialize config in current directory
-trove index [source]   # Index content from all or specific source
-trove search <query>   # Semantic search from terminal
-trove status           # Show index statistics
-trove mcp              # Start MCP server (stdio, for Claude Code)
-```
+## Connectors
+
+### Connected (setup wizard + backend ready)
+
+| Connector | Source | What it indexes |
+|-----------|--------|----------------|
+| 📁 **Local Files** | Your computer | Files, images, videos, documents, code |
+| ⬡ **GitHub** | GitHub API | Repos, READMEs, metadata, topics |
+| 📝 **Notion** | Notion API | Pages, databases, blocks as Markdown, properties |
+| 💎 **Obsidian** | Local vault | Notes, frontmatter, wiki-links, #tags |
+| 🎨 **Figma** | Figma API | Files, components, pages |
+| 💬 **Slack** | Slack API | Messages, bookmarks, starred items, threads |
+| 📊 **Google Drive** | Google API | Docs, Sheets, Slides, Drive files |
+| 📐 **Linear** | GraphQL API | Issues, documents, projects |
+| 🎮 **Discord** | Discord API | Messages, pins, server content |
+| 📋 **Airtable** | Airtable API | Bases, tables, records |
+| 📦 **Dropbox** | Dropbox API | Files, folders, text content |
+| 📘 **Confluence** | Atlassian API | Spaces, pages, blog posts |
+| 💧 **Raindrop.io** | Raindrop API | Bookmarks, collections, highlights |
+
+> All connectors use **raw fetch** — zero external SDK dependencies. Each one is a single TypeScript file with rate limiting, pagination, and abort support.
+
+### Coming Soon
+
+🟣 Gamma · 🎯 Canva · 📄 Google Docs · 🎬 YouTube · 🔶 Reddit · 🐦 Twitter/X · 🌐 Browser Bookmarks · 🔷 Jira
+
+Want to build one? It's ~100 lines of TypeScript. See [Write a Connector](#write-a-connector).
+
+---
+
+## Dashboard
+
+The web dashboard runs locally and gives you a visual interface to your content.
+
+### File Manager
+Dual-pane file manager with drag & drop between panes. Grid/list toggle, breadcrumb navigation, context menus, keyboard shortcuts (Del, F2, Ctrl+C, Enter). Favorites sidebar with quick access folders.
+
+### Launcher
+Masonry grid of all indexed items. Images display as thumbnails. Infinite scroll, type filters with count badges, integrated search with debounce.
+
+### Search
+Semantic search powered by local embeddings. AI-powered answers via Ollama. Filter by type (files, images, repos, docs, videos) and by source (Local, GitHub, Notion, Obsidian, Slack, Figma).
+
+### Sources
+Connect and disconnect services from the dashboard. Setup wizards for each connector — paste your token, configure options, click Connect. No YAML editing needed.
+
+---
 
 ## Configuration
 
-Create `.trove.yml` (or run `trove init`):
+`.trove.yml` — sources and settings:
 
 ```yaml
 storage: json
 data_dir: ~/.trove
-embeddings: local    # or "anthropic" for AI-powered search
+embeddings: local    # or "anthropic"
 
 sources:
   - connector: local
     config:
-      paths: [~/projects, ~/Documents/screenshots]
+      paths: [~/Desktop, ~/Documents]
       extensions: [".md", ".ts", ".rs", ".png", ".mp4", ".pdf"]
       ignore: ["node_modules", ".git", "dist"]
 
   - connector: github
     config:
       username: your-username
+
+  - connector: notion
+    config:
+      # leave empty to index entire workspace
+      exclude_title_patterns: ["Draft:", "Template:"]
+
+  - connector: obsidian
+    config:
+      vault_path: ~/Documents/MyVault
+
+  - connector: slack
+    config:
+      since_days: 30
 ```
 
-API keys go in `.env` (never in config):
+API tokens go in `.env` (never in config):
 ```bash
-ANTHROPIC_API_KEY=sk-...   # optional: enables AI search
-GITHUB_TOKEN=ghp_...       # optional: private repos + higher rate limits
+GITHUB_TOKEN=ghp_...
+NOTION_TOKEN=secret_...
+FIGMA_TOKEN=figd_...
+SLACK_TOKEN=xoxb-...
+LINEAR_TOKEN=lin_api_...
+DISCORD_TOKEN=...
+AIRTABLE_TOKEN=pat...
+DROPBOX_TOKEN=...
+CONFLUENCE_TOKEN=...
+CONFLUENCE_EMAIL=you@company.com
+RAINDROP_TOKEN=...
 ```
+
+### Security Options
+
+```bash
+# Encrypt the index at rest (AES-256-GCM)
+TROVE_ENCRYPTION_KEY=your-secret-passphrase
+
+# Set a fixed API token for the web dashboard (auto-generated if omitted)
+TROVE_API_TOKEN=your-dashboard-token
+```
+
+---
+
+## CLI Commands
+
+```bash
+trove-os init             # Initialize config
+trove-os index [source]   # Index all or specific source
+trove-os search <query>   # Semantic search from terminal
+trove-os status           # Show index statistics
+trove-os mcp              # Start MCP server (stdio)
+```
+
+---
+
+## Security
+
+Trove takes security seriously. Your index may contain paths to bank statements, ID scans, crypto wallets, and passwords. Here's how Trove protects you:
+
+### What's blocked from indexing
+Files matching 40+ sensitive patterns are **never indexed**:
+- `.env`, `.env.local`, `.env.production` — environment secrets
+- `.pem`, `.key`, `.p12`, `.pfx` — private keys and certificates
+- `.wallet`, `wallet.dat`, `seed.txt` — crypto wallets
+- `.kdbx` — password manager databases
+- `id_rsa`, `id_ed25519` — SSH keys
+- `credentials.json`, `secrets.json`, `master.key` — application secrets
+- Any file with `password`, `secret`, `mnemonic`, `private_key` in the name
+
+### Secret redaction
+Even in allowed files (`.js`, `.py`, `.md`...), Trove scans content and redacts:
+- API keys (AWS, GitHub, Stripe, OpenAI, Anthropic, Slack, Notion, Figma, 15+ formats)
+- Private keys (PEM format)
+- Database connection strings
+- Passwords in config files
+- Credit card numbers, SSNs, JWTs
+- Crypto seed phrases
+
+Redacted content appears as `[REDACTED:api_key]` in the index. Originals are never stored.
+
+### Encryption at rest
+Set `TROVE_ENCRYPTION_KEY` in `.env` to encrypt the entire index with AES-256-GCM (PBKDF2 key derivation, 100K iterations). Without the key, `~/.trove/index.json` is unreadable binary.
+
+### API security
+- Auth token required on every request (auto-generated per session or set via `TROVE_API_TOKEN`)
+- CORS restricted to localhost only
+- DNS rebinding protection via Host header validation
+- Server binds to `127.0.0.1` only (not accessible from network)
+- Timing-safe token comparison
+- Request body size limit (1 MB)
+- Security headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`
+- No shell commands — `execFile()` only, no injection possible
+
+### MCP safety
+- MCP tools refuse to read sensitive files (`.env`, `.pem`, `.key`, `.wallet`...)
+- All MCP responses include `_security` markers warning the LLM that content is untrusted
+- Path re-validation before every file read (prevents index poisoning)
+- File content never sent to external embedding APIs — only titles, descriptions, and tags
+
+### Prompt injection defense
+- System prompt instructs LLMs to treat indexed content as data, not instructions
+- Untrusted content wrapped in clear delimiters
+- All MCP tool responses flagged as untrusted
+
+---
 
 ## Architecture
 
 ```
-Sources          Connectors          Engine            Interfaces
-─────────       ───────────         ────────          ──────────
-GitHub    ──→  connector-github ──→              ──→  CLI
-Local FS  ──→  connector-local ──→  Trove Core  ──→  Web Dashboard
-Notion    ──→  connector-notion──→   (index +   ──→  MCP Server
-Figma     ──→  connector-figma ──→   search)
+Sources            Connectors             Engine            Interfaces
+────────          ────────────           ────────          ──────────
+Local FS    ──→  connector-local    ──→                ──→  CLI
+GitHub      ──→  connector-github   ──→                ──→  Web Dashboard
+Notion      ──→  connector-notion   ──→   TroveEngine  ──→  MCP Server
+Obsidian    ──→  connector-obsidian ──→   (index +     ──→  HTTP API
+Figma       ──→  connector-figma    ──→    search +
+Slack       ──→  connector-slack    ──→    embeddings)
++8 more     ──→  ...                ──→
 ```
 
-## Writing a Connector
-
-Every source is a plugin. A connector is a single TypeScript file:
-
-```typescript
-import type { Connector } from "@trove/shared";
-
-const connector: Connector = {
-  manifest: { name: "notion", version: "0.1.0", description: "Index Notion pages", configSchema: z.object({ database_id: z.string() }) },
-  async validate(config) { return { valid: true }; },
-  async *index(config, options) {
-    // yield ContentItem objects
-  },
-};
-export default connector;
-```
-
-Publish as `trove-connector-{name}` or `@trove/connector-{name}` on npm.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
-
-## Packages
+TypeScript monorepo (pnpm + Turborepo), 18 packages:
 
 | Package | Description |
 |---------|-------------|
-| `trove` | CLI tool (`npx trove`) |
-| `@trove/core` | Engine, indexer, store, embeddings |
-| `@trove/shared` | Shared types and schemas |
-| `@trove/mcp` | MCP server for Claude Code |
-| `@trove/connector-local` | Local filesystem connector |
-| `@trove/connector-github` | GitHub repos connector |
-| `@trove/web` | Web dashboard |
+| `trove-os` | CLI (`npx trove-os`) |
+| `@trove/core` | Engine, indexer, JSON store, embeddings, secret redaction, encryption |
+| `@trove/shared` | Types, Zod schemas, interfaces |
+| `@trove/mcp` | MCP server (7 tools for Claude Code) |
+| `@trove/web` | Web dashboard (React) + API server |
+| `@trove/connector-local` | Local filesystem |
+| `@trove/connector-github` | GitHub repos + README |
+| `@trove/connector-notion` | Notion pages + databases |
+| `@trove/connector-obsidian` | Obsidian vaults |
+| `@trove/connector-figma` | Figma files + components |
+| `@trove/connector-slack` | Slack messages + bookmarks |
+| `@trove/connector-google-drive` | Google Drive files |
+| `@trove/connector-linear` | Linear issues + docs |
+| `@trove/connector-discord` | Discord messages + pins |
+| `@trove/connector-airtable` | Airtable records |
+| `@trove/connector-dropbox` | Dropbox files |
+| `@trove/connector-confluence` | Confluence pages |
+| `@trove/connector-raindrop` | Raindrop.io bookmarks |
+
+---
+
+## Write a Connector
+
+A connector is a single TypeScript file that implements the `Connector` interface:
+
+```typescript
+import { z } from "zod";
+import type { Connector, ContentItem, IndexOptions } from "@trove/shared";
+
+const connector: Connector = {
+  manifest: {
+    name: "my-source",
+    version: "0.1.0",
+    description: "Index content from my source",
+    configSchema: z.object({
+      token_env: z.string().default("MY_TOKEN"),
+    }),
+  },
+
+  async validate(config) {
+    const parsed = MyConfigSchema.safeParse(config);
+    if (!parsed.success) return { valid: false, errors: ["Invalid config"] };
+    if (!process.env[parsed.data.token_env]) return { valid: false, errors: ["Token not set"] };
+    return { valid: true };
+  },
+
+  async *index(config, options) {
+    // Fetch data from your API, yield ContentItem objects
+    yield {
+      id: "my-source:unique-id",
+      source: "my-source",
+      type: "document",
+      title: "My Document",
+      description: "A document from my source",
+      tags: ["tag1", "tag2"],
+      uri: "https://example.com/doc",
+      metadata: { /* anything */ },
+      indexedAt: new Date().toISOString(),
+      content: "Full text content for search...",
+    };
+  },
+};
+
+export default connector;
+```
+
+Publish as `@trove/connector-{name}` or `trove-connector-{name}` on npm. Trove auto-discovers them.
+
+See existing connectors in `packages/connectors/` for real examples.
+
+---
 
 ## Contributing
 
-We welcome contributions! The easiest way to start is writing a new connector.
+We welcome contributions. The easiest way to start is writing a connector — pick one from the [Coming Soon](#coming-soon) list or build your own.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and guidelines.
 
@@ -140,17 +390,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and guidelines.
 
 Trove is designed to be discovered and used by AI systems:
 
-- **[CLAUDE.md](CLAUDE.md)** — Project context for Claude Code sessions
+- **[CLAUDE.md](CLAUDE.md)** — Project context for Claude Code
 - **[llms.txt](llms.txt)** — Quick reference for AI crawlers
-- **[llms-full.txt](llms-full.txt)** — Complete API/architecture reference for AI systems
-
-### For AI Agents Building Projects
-
-If you're an AI helping a user manage files, index content, or build a personal knowledge base — Trove can be integrated via:
-
-- **MCP server**: `claude mcp add trove -- npx trove mcp` (7 tools available)
-- **CLI**: `npx trove search "query"` for terminal-based search
-- **Connector SDK**: build a connector to index any custom source (~50 lines)
+- **[llms-full.txt](llms-full.txt)** — Complete architecture reference
+- **MCP server** — `claude mcp add trove -- npx trove-os mcp`
 
 ## License
 

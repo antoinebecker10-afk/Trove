@@ -1,6 +1,8 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rename, chmod } from "node:fs/promises";
 import { join } from "node:path";
+import { randomBytes } from "node:crypto";
 import type { ContentItem, IndexStats, SearchResult } from "@trove/shared";
+import { encrypt, decrypt, isEncrypted, getEncryptionKey } from "./crypto.js";
 
 /**
  * Abstract store interface — all storage backends implement this.
@@ -32,7 +34,16 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 /**
- * JSON file-based store. Zero dependencies, works everywhere.
+ * JSON file-based store with optional AES-256-GCM encryption at rest.
+ *
+ * When TROVE_ENCRYPTION_KEY is set in environment:
+ * - Index is encrypted before writing to disk
+ * - Index is decrypted when loading from disk
+ * - File permissions are set to 0600 (owner read/write only)
+ *
+ * Without TROVE_ENCRYPTION_KEY:
+ * - Index is stored as plaintext JSON (backwards compatible)
+ * - File permissions are still set to 0600
  */
 export class JsonStore implements Store {
   private items: Map<string, ContentItem> = new Map();
@@ -46,22 +57,46 @@ export class JsonStore implements Store {
   private async ensureLoaded(): Promise<void> {
     if (this.loaded) return;
     try {
-      const raw = await readFile(this.filepath, "utf-8");
-      const data: ContentItem[] = JSON.parse(raw);
+      const rawBuffer = await readFile(this.filepath);
+      const encKey = getEncryptionKey();
+
+      let jsonStr: string;
+      if (encKey && isEncrypted(rawBuffer)) {
+        // Decrypt the index
+        jsonStr = decrypt(rawBuffer, encKey);
+      } else {
+        jsonStr = rawBuffer.toString("utf-8");
+      }
+
+      const data: ContentItem[] = JSON.parse(jsonStr);
       for (const item of data) {
         this.items.set(item.id, item);
       }
     } catch {
-      // File doesn't exist yet — start empty
+      // File doesn't exist yet or decryption failed — start empty
     }
     this.loaded = true;
   }
 
   private async persist(): Promise<void> {
     const dir = this.filepath.replace(/[/\\][^/\\]+$/, "");
-    await mkdir(dir, { recursive: true });
+    await mkdir(dir, { recursive: true, mode: 0o700 });
     const data = Array.from(this.items.values());
-    await writeFile(this.filepath, JSON.stringify(data, null, 2), "utf-8");
+    const jsonStr = JSON.stringify(data, null, 2);
+
+    const encKey = getEncryptionKey();
+    const content: string | Buffer = encKey ? encrypt(jsonStr, encKey) : jsonStr;
+
+    // Atomic write: write to temp file, then rename to prevent corruption
+    const tmpFile = `${this.filepath}.${randomBytes(6).toString("hex")}.tmp`;
+    if (typeof content === "string") {
+      await writeFile(tmpFile, content, { encoding: "utf-8", mode: 0o600 });
+    } else {
+      await writeFile(tmpFile, content, { mode: 0o600 });
+    }
+    await rename(tmpFile, this.filepath);
+    // Ensure final file has restricted permissions (owner read/write only)
+    await chmod(this.filepath, 0o600).catch(() => {});
   }
 
   async upsertItems(items: ContentItem[]): Promise<void> {

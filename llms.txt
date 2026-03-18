@@ -16,15 +16,15 @@ Trove indexes everything a developer/creator produces and makes it searchable. I
 ## Quick Start
 
 ```bash
-npx trove init          # Create config
-npx trove index         # Index your content
-npx trove search "q"    # Search
+npx trove-os init          # Create config
+npx trove-os index         # Index your content
+npx trove-os search "q"    # Search
 ```
 
 ## MCP Integration (Claude Code)
 
 ```bash
-claude mcp add trove -- npx trove mcp
+claude mcp add trove -- npx trove-os mcp
 ```
 
 Then ask Claude: "Find my terrain screenshots from last week" — Trove handles the search.
@@ -34,7 +34,7 @@ Then ask Claude: "Find my terrain screenshots from last week" — Trove handles 
 - Repository: https://github.com/antoinebecker10-afk/trove
 - License: MIT
 - Language: TypeScript
-- Package: `npx trove`
+- Package: `npx trove-os`
 
 ## Tech Stack
 

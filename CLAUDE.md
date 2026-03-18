@@ -22,7 +22,7 @@ packages/
     local/          @trove/connector-local   — Filesystem indexer (path traversal protection, symlink check)
     github/         @trove/connector-github  — GitHub repos + README via API (pagination, rate limits)
   mcp/              @trove/mcp        — MCP server, 7 tools for Claude Code
-  cli/              trove (npm)       — CLI: init, index, search, status, mcp
+  cli/              trove-os (npm)    — CLI: init, index, search, status, mcp
   web/              @trove/web        — React dashboard, cyberpunk terminal UI
 ```
 
@@ -49,11 +49,11 @@ packages/
 ## CLI Commands
 
 ```bash
-npx trove init          # Scaffold .trove.yml + .env
-npx trove index         # Index all sources
-npx trove search <q>    # Search from terminal
-npx trove status        # Show index stats
-npx trove mcp           # Start MCP server (stdio for Claude Code)
+npx trove-os init          # Scaffold .trove.yml + .env
+npx trove-os index         # Index all sources
+npx trove-os search <q>    # Search from terminal
+npx trove-os status        # Show index stats
+npx trove-os mcp           # Start MCP server (stdio for Claude Code)
 ```
 
 ## Config

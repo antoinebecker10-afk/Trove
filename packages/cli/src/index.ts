@@ -12,6 +12,10 @@ registerBuiltinConnector("github", async () => {
   const mod = await import("@trove/connector-github");
   return mod.default;
 });
+registerBuiltinConnector("notion", async () => {
+  const mod = await import("@trove/connector-notion");
+  return mod.default;
+});
 
 // Load .env file if present (dotenv-free: use Node 20+ built-in)
 try {

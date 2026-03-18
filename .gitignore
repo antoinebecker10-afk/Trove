@@ -3,20 +3,40 @@ dist/
 .turbo/
 *.tsbuildinfo
 
-# Environment & secrets
+# Environment & secrets — NEVER commit
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 *.key
 *.pem
+*.p12
+*.pfx
+*.keystore
 
-# Trove data
+# Trove user data — contains personal paths, usernames, tokens
 .trove/
+.trove.yml
+
+# Logs — may contain tokens, paths, or personal data
+*.log
+logs/
+
+# Test output
+coverage/
+.nyc_output/
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# IDE
+# IDE — may contain personal paths
 .vscode/settings.json
+.vscode/launch.json
 .idea/
+*.swp
+*.swo
+*~
+
+# Claude Code memory — personal data
+.claude/

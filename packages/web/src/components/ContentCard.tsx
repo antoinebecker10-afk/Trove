@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { colors, fonts, TYPE_META } from "../lib/theme";
 import { useGlitch } from "../hooks/useGlitch";
-import type { ApiContentItem } from "../lib/api";
+import { api, type ApiContentItem } from "../lib/api";
 
 interface ContentCardProps {
   item: ApiContentItem;
   index: number;
+  onPreview: (item: ApiContentItem) => void;
+  onMove: (item: ApiContentItem) => void;
 }
 
-export function ContentCard({ item, index }: ContentCardProps) {
+export function ContentCard({ item, index, onPreview, onMove }: ContentCardProps) {
   const [hovered, setHovered] = useState(false);
   const meta = TYPE_META[item.type] ?? TYPE_META.file;
   const glitched = useGlitch(item.title, hovered);
@@ -17,6 +19,7 @@ export function ContentCard({ item, index }: ContentCardProps) {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={() => onPreview(item)}
       style={{
         background: hovered ? colors.surfaceHover : "rgba(255,255,255,0.015)",
         border: `1px solid ${hovered ? meta.color + "55" : colors.border}`,
@@ -162,29 +165,37 @@ export function ContentCard({ item, index }: ContentCardProps) {
                 borderTop: `1px solid ${colors.border}`,
               }}
             >
-              <CardAction
-                label={item.source === "github" ? "OPEN ON GITHUB" : "COPY PATH"}
-                color={meta.color}
-                onClick={() => {
-                  if (item.source === "github" || item.uri.startsWith("http")) {
-                    window.open(item.uri, "_blank", "noopener");
-                  } else {
-                    navigator.clipboard.writeText(item.uri).catch(() => {});
-                  }
-                }}
-              />
-              {item.source === "local" && (
+              {item.source === "github" ? (
                 <CardAction
-                  label="OPEN IN IDE"
-                  color={colors.cyan}
+                  label="OPEN ON GITHUB"
+                  color={meta.color}
                   onClick={() => {
-                    // vscode:// protocol to open file directly
-                    window.open(`vscode://file${item.uri}`, "_self");
+                    window.open(item.uri, "_blank", "noopener");
+                  }}
+                />
+              ) : (
+                <CardAction
+                  label="OPEN"
+                  color={colors.brand}
+                  onClick={() => {
+                    api.openFile(item.uri).catch(() => {});
                   }}
                 />
               )}
               <CardAction
-                label="COPY URI"
+                label="PREVIEW"
+                color={colors.green}
+                onClick={() => onPreview(item)}
+              />
+              {item.source === "local" && (
+                <CardAction
+                  label="MOVE"
+                  color={colors.cyan}
+                  onClick={() => onMove(item)}
+                />
+              )}
+              <CardAction
+                label="COPY PATH"
                 color={colors.textDim}
                 onClick={() => {
                   navigator.clipboard.writeText(item.uri).catch(() => {});

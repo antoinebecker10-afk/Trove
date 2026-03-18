@@ -23,19 +23,28 @@ export function registerBuiltinConnector(
  * 3. Community npm package: trove-connector-{name}
  * 4. Absolute/relative path (for local development)
  */
+/** Connector names must be safe identifiers: lowercase alphanumeric + hyphens only. */
+const SAFE_CONNECTOR_NAME = /^[a-z0-9][a-z0-9-]*$/;
+
 export async function loadConnector(source: SourceConfig): Promise<Connector> {
   const name = source.connector;
+
+  // Validate connector name to prevent path traversal / arbitrary imports
+  if (!SAFE_CONNECTOR_NAME.test(name)) {
+    throw new Error(
+      `Invalid connector name "${name}". Names must be lowercase alphanumeric with hyphens only.`,
+    );
+  }
 
   // 1. Built-in
   if (BUILTIN_CONNECTORS[name]) {
     return BUILTIN_CONNECTORS[name]();
   }
 
-  // 2-4. Dynamic import with fallback chain
+  // 2-3. Dynamic import with fallback chain (no arbitrary paths)
   const candidates = [
     `@trove/connector-${name}`,
     `trove-connector-${name}`,
-    name, // absolute/relative path
   ];
 
   for (const candidate of candidates) {

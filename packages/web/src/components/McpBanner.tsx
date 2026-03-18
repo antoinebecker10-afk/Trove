@@ -34,7 +34,7 @@ export function McpBanner() {
           <span
             style={{ color: colors.textMuted, fontFamily: fonts.mono }}
           >
-            claude mcp add trove -- npx trove mcp
+            claude mcp add trove -- npx trove-os mcp
           </span>
         </div>
       </div>

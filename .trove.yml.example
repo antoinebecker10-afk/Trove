@@ -1,0 +1,38 @@
+# Trove configuration — copy to .trove.yml and customize
+storage: json
+data_dir: ~/.trove
+embeddings: local    # or "anthropic" (requires ANTHROPIC_API_KEY)
+
+sources:
+  - connector: local
+    config:
+      paths:
+        - ~/Desktop
+        - ~/Documents
+      extensions: [".md", ".ts", ".js", ".py", ".rs", ".png", ".jpg", ".mp4", ".pdf"]
+      ignore: ["node_modules", ".git", "dist", "target"]
+      max_depth: 5
+
+  - connector: github
+    config:
+      username: your-github-username
+      include_forks: false
+      include_archived: false
+
+  # Uncomment to add more sources:
+
+  # - connector: notion
+  #   config: {}
+  #     # Leave empty to index entire workspace
+  #     # Or specify database_ids: ["abc123"]
+
+  # - connector: obsidian
+  #   config:
+  #     vault_path: ~/Documents/MyVault
+
+  # - connector: slack
+  #   config:
+  #     since_days: 30
+
+  # - connector: figma
+  #   config: {}

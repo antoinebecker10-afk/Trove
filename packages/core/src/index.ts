@@ -8,3 +8,5 @@ export {
   type EmbeddingProvider,
 } from "./embeddings.js";
 export { loadConnector, registerBuiltinConnector } from "./plugin-loader.js";
+export { redactSecrets, containsSecrets } from "./redact.js";
+export { encrypt, decrypt, isEncrypted, getEncryptionKey } from "./crypto.js";

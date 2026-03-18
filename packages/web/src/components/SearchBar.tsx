@@ -5,9 +5,10 @@ interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   onSearch: () => void;
+  loading?: boolean;
 }
 
-export function SearchBar({ value, onChange, onSearch }: SearchBarProps) {
+export function SearchBar({ value, onChange, onSearch, loading = false }: SearchBarProps) {
   const [focused, setFocused] = useState(false);
 
   return (
@@ -56,22 +57,24 @@ export function SearchBar({ value, onChange, onSearch }: SearchBarProps) {
       />
       <button
         onClick={onSearch}
+        disabled={loading}
         style={{
           margin: "6px",
           padding: "6px 18px",
           background: colors.brandGlow,
           border: `1px solid ${colors.brand}66`,
           borderRadius: "2px",
-          color: colors.brand,
+          color: loading ? colors.brandDim : colors.brand,
           fontSize: "11px",
           fontFamily: fonts.mono,
           letterSpacing: "0.1em",
-          cursor: "pointer",
+          cursor: loading ? "wait" : "pointer",
           textTransform: "uppercase",
           transition: "all 0.15s",
+          opacity: loading ? 0.7 : 1,
         }}
       >
-        FIND
+        {loading ? "..." : "FIND"}
       </button>
     </div>
   );
