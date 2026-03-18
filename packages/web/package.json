@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@trove/core": "workspace:*",
+    "@trove/shared": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

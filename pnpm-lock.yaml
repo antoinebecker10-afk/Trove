@@ -334,6 +334,9 @@ importers:
       '@trove/core':
         specifier: workspace:*
         version: link:../core
+      '@trove/shared':
+        specifier: workspace:*
+        version: link:../shared
       react:
         specifier: ^19.0.0
         version: 19.2.4
