@@ -109,8 +109,12 @@ npx trove-os mcp   # stdio server
 ## Desktop app
 
 ```bash
-npx trove-os desktop
+trove-os desktop
 ```
+
+<p align="center">
+  <img src="assets/trove-desktop.png" width="800" alt="Trove desktop app" />
+</p>
 
 Electron app with search, source management, file browser (dual-pane, drag & drop), keyboard shortcuts. Connects to the same index as the CLI and MCP server.
 
@@ -235,6 +239,28 @@ export default connector;
 ```
 
 Publish as `trove-connector-{name}` on npm. See `packages/connectors/` for real examples.
+
+---
+
+## Dev setup (running from source)
+
+If you cloned the repo and want to run Trove locally without publishing to npm:
+
+```bash
+git clone https://github.com/antoinebecker10-afk/trove.git
+cd trove
+pnpm install
+pnpm build
+cd packages/cli && pnpm link --global && cd ../..
+```
+
+Now `trove-os` works everywhere on your machine:
+
+```bash
+trove-os setup
+trove-os search "query"
+trove-os desktop
+```
 
 ---
 
